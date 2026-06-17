@@ -7,10 +7,25 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { htmlLang, t as tr, wedding, type Lang } from "@/config/wedding";
+
+// Detect language from <html lang> at mount; default to configured locale.
+function useBoundaryLang(): Lang {
+  const [lang, setLang] = useState<Lang>(wedding.language.default);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const code = document.documentElement.lang;
+    const match = (Object.entries(htmlLang) as [Lang, string][]).find(
+      ([, v]) => v === code,
+    );
+    if (match) setLang(match[0]);
+  }, []);
+  return lang;
+}
 
 function NotFoundComponent() {
   return (
