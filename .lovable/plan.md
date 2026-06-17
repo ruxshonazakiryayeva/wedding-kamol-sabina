@@ -1,107 +1,84 @@
 
-# Wedding Invitation Template
+# Full i18n Coverage Pass
 
-A single-page wedding invitation site inspired by momento.uz. Built as a **reusable template**: all couple-specific content lives in one config file, so spinning up a new client = duplicate project, edit one file, swap a few images.
+Goal: no hardcoded UI strings anywhere in the app. Add Uzbek Cyrillic as a 4th locale. No UI/layout changes, no new features.
 
-## Sections (top to bottom, single page)
+## 1. Extend the locale set
 
-1. **Locked Hero** — Full-screen floral background, couple names inside a heart, lock icon. Click unlocks (scrolls into the invitation).
-2. **Welcome / Greeting** — Short message to guests, soft fabric background.
-3. **Countdown** — Days / hours / minutes / seconds until the wedding.
-4. **Calendar** — Single month grid with the wedding day highlighted as a heart.
-5. **Event Details** — Venue name, address, time, dress code, format (e.g. halal/no alcohol).
-6. **Venue Photos** — 2–3 images (exterior, interior) with short captions.
-7. **Location / Map** — Address block + Google Maps / Yandex Maps / route buttons (plain links, no embedded SDK).
-8. **RSVP Form** — Guest name, party size (1–5), attending yes/no, optional comment.
-9. **Gifts / Requests** — Polite note about envelopes / no money during dancing / Telegram group link.
-10. **Closing Thanks** — Floral image, signature from the couple.
-11. **Share** — Telegram, WhatsApp, Copy-link buttons.
-12. **Guest List** (optional, can be hidden per client) — Table of confirmed RSVPs.
+In `src/config/wedding.ts`:
+- `Lang` type → `"uz" | "uz-cyrl" | "ru" | "en"` (uz = Latin, uz-cyrl = Cyrillic).
+- `wedding.language.available` → `["uz", "uz-cyrl", "ru", "en"]`.
+- Add a display-label map so the switcher chips render `UZ`, `УЗ`, `RU`, `EN` instead of raw codes.
 
-Persistent UI: language switcher (UZ / RU / EN) top-right, background music toggle top-left.
+## 2. Expand the `i18n` dictionary
 
-## Features
+Add the following keys (currently hardcoded) to every locale (`uz`, `uz-cyrl`, `ru`, `en`):
 
-- **Config-driven content** — One `src/config/wedding.ts` file holds every couple-specific value (names, date, venue, texts, image paths, map links, feature toggles). No code changes per client.
-- **i18n** — 3 languages (UZ/RU/EN) via a simple JSON dictionary in the same config. Default language configurable.
-- **Lock-screen reveal** — Hero stays locked until user taps the heart; then page scrolls/unlocks.
-- **Live countdown** — Pure client-side timer from `weddingDate`.
-- **RSVP** — Lovable Cloud table (`rsvps`) with one server function for insert and one for list (admin only). Cheapest backend option; no external services.
-- **Public guest list** — Reads from same `rsvps` table; toggle on/off per client via config.
-- **Share buttons** — Native links (`t.me/share`, `wa.me`, `navigator.clipboard`). No SDKs.
-- **Background music** — Single `<audio>` tag, mp3 in `/public`, toggle button. Off by default.
-- **Maps** — Plain anchor links to Google/Yandex (no API keys, no SDK = $0).
-- **SEO/OG** — Title, description, og:image set from config so each client has proper share previews.
-- **Feature toggles** — `showGuestList`, `showMusic`, `showCountdown`, etc. in config to hide/show sections without code edits.
+- `toggleMusic`, `unlockInvitation` — aria-labels
+- `shareTelegram`, `shareWhatsApp` — share button labels
+- `telegramGroup` — gifts Telegram link label
+- `guestCountRange` — RSVP "1 — 5" helper (translated phrasing per locale)
+- `notFoundTitle`, `notFoundBody`, `goHome` — 404 page
+- `errorTitle`, `errorBody`, `tryAgain` — error boundary
+- `seoTitleSuffix`, `seoDescriptionTemplate` — SEO strings (rendered per current language with the couple names + date interpolated)
 
-## Design Style
+Also re-translate existing keys for the new `uz-cyrl` locale (mirror of `uz` in Cyrillic).
 
-- **Mood:** elegant, airy, romantic, monochrome with a single soft accent.
-- **Palette:** off-white background (`oklch(0.98 0.005 90)`), warm ink black for text, muted rose/blush accent (`oklch(0.78 0.05 20)`), light beige cards. Defined as semantic tokens in `src/styles.css`.
-- **Typography:** serif display for couple names and section titles (e.g. Cormorant Garamond / Playfair); clean sans for body (Inter or DM Sans). Loaded via Google Fonts link in `__root.tsx`.
-- **Layout:** single column, generous whitespace, narrow content width (~640px) centered.
-- **Imagery:** soft black-and-white floral hero backgrounds; rounded photos with subtle shadow.
-- **Decorative touches:** thin divider lines with a small heart/leaf glyph; uppercase tracked-out section eyebrows above each headline.
+## 3. Move the per-couple messages into i18n-shaped objects
 
-## Animations (lightweight, CSS / Framer Motion-lite)
-
-- Hero lock heart: gentle pulse loop.
-- On unlock: fade + scale of the heart, smooth scroll to next section.
-- Scroll-triggered fade-up on every section (IntersectionObserver, no heavy lib).
-- Countdown digits: subtle flip/fade on change.
-- Calendar wedding-day cell: slow heartbeat pulse.
-- Image hover: slight zoom on venue photos.
-- Background floral images: very slow parallax (transform on scroll), disabled on mobile for perf.
-
-No video, no Lottie, no WebGL — keeps build and bandwidth cost minimal.
-
-## Required Content Fields (the per-client config)
+In `src/config/wedding.ts`, change `messages` from flat strings into per-locale records, e.g.:
 
 ```ts
-{
-  couple: { nameA, nameB, monogram? },
-  date: { iso, displayDate, displayTime, doorsOpenTime },
-  venue: { name, addressLine, city, mapsGoogle, mapsYandex, route },
-  dressCode, format,                       // short strings
-  greeting: { eyebrow, title, body },
-  closing:  { title, body, signature },
-  gifts:    { intro, danceNote, telegramGroupUrl },
-  photos:   { heroBg, fabricBg, venueExterior, venueInterior, closingBg, ogImage },
-  music:    { src, autoplay: false },
-  share:    { url },
-  features: { music, countdown, calendar, guestList, rsvp },
-  language: { default: 'uz', available: ['uz','ru','en'] },
-  i18n:     { uz: {...}, ru: {...}, en: {...} }  // labels only; couple text above stays as-is
+messages = {
+  greeting:        { uz: "...", "uz-cyrl": "...", ru: "...", en: "..." },
+  giftsIntro:      { uz, "uz-cyrl", ru, en },
+  giftsEnvelope:   { uz, "uz-cyrl", ru, en },
+  giftsDanceNote:  { uz, "uz-cyrl", ru, en },
+  closing:         { uz, "uz-cyrl", ru, en },
 }
 ```
 
-## Technical Plan (low cost)
+Components read `messages.greeting[lang]` etc. via a small `m(key, lang)` helper that falls back to `uz` when a translation is missing (safe for templating: a client can leave non-default languages blank and the app still renders).
 
-- **Stack:** existing TanStack Start template, Tailwind, shadcn — no new heavy deps. Add only `framer-motion` (small) for reveal animations, or skip it and use CSS keyframes.
-- **Routes:**
-  - `/` — the invitation (single page, all sections).
-  - `/admin/rsvps` — gated guest-list dashboard (auth required) — optional, can ship later.
-- **Backend (Lovable Cloud):**
-  - Table `rsvps(id, guest_name, party_size, attending, comment, created_at)`.
-  - RLS: anonymous `INSERT` allowed; `SELECT` only for authenticated admin (or public if `showGuestList = true`).
-  - Two server functions: `submitRsvp`, `listRsvps`.
-- **Assets:** placed in `/public/wedding/` per client; referenced by config. Use `.webp` to keep bandwidth low.
-- **Build cost optimizations:** no map SDK, no analytics, no third-party fonts beyond Google Fonts, single page = single bundle, images lazy-loaded.
+## 4. Component edits (text replacements only — no layout/markup changes)
 
-## Reuse Workflow (for each new client)
+- **`Invitation.tsx`**
+  - Replace every hardcoded string with `t(...)` or `m(...)` lookups.
+  - aria-labels, share button labels, gifts Telegram label, RSVP range helper, greeting/gifts/closing bodies all switch to lookups.
+  - Calendar month name: replace `toLocaleString` with explicit translated month-name array per locale so it reflects the chosen language (currently it uses the browser locale and would never show Cyrillic).
+  - Weekday labels already branch on `lang`; add a `uz-cyrl` branch.
 
-1. Duplicate the project.
-2. Replace images in `/public/wedding/`.
-3. Edit `src/config/wedding.ts` (names, date, venue, texts, toggles).
-4. Update `__root.tsx` meta title/description (or read from config).
-5. Publish.
+- **`__root.tsx`**
+  - Wrap the 404 component and the error component in client-side language detection (read `document.documentElement.lang`, default to `wedding.language.default`) and pull strings from the dictionary. These render outside the main app tree, so they use a tiny standalone `pickLang()` helper exported from `config/wedding.ts`.
+  - Set `<html lang>` from the default language on the shell.
+  - Default `<title>`/description stay as a fallback; the per-route head() in `index.tsx` overrides them.
 
-No component edits required for a standard client.
+- **`src/routes/index.tsx`**
+  - Generate title/description from `i18n[default].seoTitleSuffix` + `seoDescriptionTemplate` with couple/date/venue interpolated, instead of an English literal. Use the configured default language.
 
-## Out of Scope (kept out to control cost)
+## 5. Language switcher
 
-- Multiple themes / theme picker (can add later as a `theme` field in config).
-- Photo galleries with lightbox.
-- Live-streaming or video backgrounds.
-- Embedded map SDK.
-- Email/SMS notifications on RSVP (can be added later via a webhook).
+- Render labels from the new display map (`UZ / УЗ / RU / EN`).
+- Persist selection to `localStorage` so language sticks across navigations (small win, no design change — purely behavior to make sure "switcher works for every single text element" survives a reload).
+- On change, also update `document.documentElement.lang` so screen readers and the 404/error boundary pick up the right language.
+
+## 6. Re-check pass
+
+After edits, grep the source tree for:
+- string literals containing letters inside `Invitation.tsx`, `__root.tsx`, `index.tsx` that aren't class names, route paths, URLs, font names, or i18n keys
+- any remaining Uzbek/Russian word in component files (`rg "[А-Яа-яʻ]" src/components src/routes`)
+
+If anything remains, route it through `t()`/`m()` and add the matching dictionary entries.
+
+## Out of scope
+
+- No new features (RSVP backend, theme picker, etc.).
+- No layout, spacing, or visual changes.
+- No content rewrites — translations preserve the original meaning.
+
+## Files changed
+
+- `src/config/wedding.ts` — new locale, extended dictionary, per-locale messages, helpers.
+- `src/components/wedding/Invitation.tsx` — replace literals with lookups; add Cyrillic branches in calendar; localStorage + `<html lang>` sync in the page root.
+- `src/routes/__root.tsx` — localize 404 + error boundary.
+- `src/routes/index.tsx` — localize SEO meta.

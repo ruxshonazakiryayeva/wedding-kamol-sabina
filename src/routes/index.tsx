@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Invitation from "@/components/wedding/Invitation";
-import { wedding } from "@/config/wedding";
+import { wedding, t as tr } from "@/config/wedding";
 
-const title = `${wedding.couple.nameA} & ${wedding.couple.nameB} — Wedding Invitation`;
-const description = `Join ${wedding.couple.nameA} & ${wedding.couple.nameB} on ${wedding.date.displayDate} at ${wedding.venue.name}, ${wedding.venue.city}.`;
+const lang = wedding.language.default;
+const couple = `${wedding.couple.nameA} & ${wedding.couple.nameB}`;
+const title = `${couple} — ${tr(lang, "invitationLine")}`;
+// Localised description: "<greetingEyebrow>, <date> · <venue>, <city>".
+const description = `${tr(lang, "greetingEyebrow")} · ${wedding.date.displayDate} · ${wedding.venue.name}, ${wedding.venue.city}`;
 
 export const Route = createFileRoute("/")({
   head: () => ({
