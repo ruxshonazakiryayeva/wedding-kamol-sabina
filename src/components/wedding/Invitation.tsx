@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Heart, Lock, MapPin, Music2, VolumeX, Copy, Send } from "lucide-react";
-import { wedding, i18n, messages, type Lang } from "@/config/wedding";
+import {
+  wedding,
+  messages,
+  langLabels,
+  htmlLang,
+  calendarStrings,
+  pickText,
+  t as tr,
+  type Lang,
+} from "@/config/wedding";
 
 // ---------- helpers ----------
 function useT(lang: Lang) {
-  return (key: keyof (typeof i18n)["en"]) => i18n[lang][key] ?? key;
+  return (key: string) => tr(lang, key);
 }
 
 function useReveal<T extends HTMLElement = HTMLDivElement>() {
@@ -95,7 +104,7 @@ function Hero({
         {music.available ? (
           <button
             onClick={toggleMusic}
-            aria-label="Toggle music"
+            aria-label={t("toggleMusic")}
             className="rounded-full bg-background/70 p-2 backdrop-blur-md shadow-sm"
           >
             {music.playing ? <Music2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
@@ -114,7 +123,7 @@ function Hero({
                   : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              {l}
+              {langLabels[l]}
             </button>
           ))}
         </div>
@@ -149,7 +158,7 @@ function Hero({
             </h1>
             <button
               onClick={onUnlock}
-              aria-label="Unlock invitation"
+              aria-label={t("unlockInvitation")}
               className="heartbeat mt-8 rounded-full border border-foreground/30 bg-background/60 p-4 backdrop-blur transition hover:bg-background"
             >
               <Lock className="h-5 w-5" />
@@ -167,17 +176,19 @@ function Hero({
 // ---------- Countdown ----------
 function useCountdown(iso: string) {
   const target = useMemo(() => new Date(iso).getTime(), [iso]);
-  const [now, setNow] = useState(() => Date.now());
+  // Start at 0 on both server and client to avoid hydration mismatch.
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
-  const diff = Math.max(0, target - now);
+  const diff = now === null ? 0 : Math.max(0, target - now);
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
   const minutes = Math.floor((diff % 3600000) / 60000);
   const seconds = Math.floor((diff % 60000) / 1000);
-  return { days, hours, minutes, seconds };
+  return { days, hours, minutes, seconds, ready: now !== null };
 }
 
 function Countdown({ lang }: { lang: Lang }) {
@@ -197,7 +208,7 @@ function Countdown({ lang }: { lang: Lang }) {
           <div key={label} className="flex items-start gap-3 sm:gap-6">
             <div className="flex flex-col items-center">
               <div className="font-serif text-4xl tabular-nums sm:text-6xl">
-                {String(v).padStart(2, "0")}
+                {c.ready ? String(v).padStart(2, "0") : "00"}
               </div>
               <div className="eyebrow mt-2">{label}</div>
             </div>
@@ -234,7 +245,7 @@ function Greeting({ lang }: { lang: Lang }) {
       </h2>
       <Ornament />
       <p className="mx-auto max-w-md text-base leading-relaxed text-muted-foreground">
-        {messages.greeting}
+        {pickText(messages.greeting, lang)}
       </p>
       <p className="mt-6 text-sm italic text-muted-foreground">
         {t("weAreThankful")}
@@ -250,9 +261,7 @@ function Calendar({ lang }: { lang: Lang }) {
   const year = d.getFullYear();
   const month = d.getMonth();
   const wedDay = d.getDate();
-  const monthName = d
-    .toLocaleString(lang === "uz" ? "en-GB" : lang, { month: "long", year: "numeric" })
-    .toUpperCase();
+  const monthName = `${calendarStrings[lang].months[month]} ${year}`;
 
   const firstDay = new Date(year, month, 1);
   // Mon=0 ... Sun=6
@@ -263,12 +272,7 @@ function Calendar({ lang }: { lang: Lang }) {
   for (let i = 1; i <= daysInMonth; i++) cells.push(i);
   while (cells.length % 7 !== 0) cells.push(null);
 
-  const weekdays =
-    lang === "uz"
-      ? ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"]
-      : lang === "ru"
-        ? ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
-        : ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+  const weekdays = calendarStrings[lang].weekdays;
 
   return (
     <Section id="calendar" className="text-center">
@@ -424,9 +428,6 @@ function RSVP({ lang }: { lang: Lang }) {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO(template): wire to a backend (Lovable Cloud `rsvps` table).
-    // For the template baseline we just acknowledge in-page so there are
-    // no backend costs out of the box.
     setSubmitted(true);
   };
 
@@ -469,7 +470,9 @@ function RSVP({ lang }: { lang: Lang }) {
               >
                 +
               </button>
-              <span className="ml-2 text-xs text-muted-foreground">1 — 5</span>
+              <span className="ml-2 text-xs text-muted-foreground">
+                {t("guestCountRange")}
+              </span>
             </div>
           </div>
 
@@ -526,9 +529,9 @@ function Gifts({ lang }: { lang: Lang }) {
       <h2 className="mt-3 font-serif text-3xl">{t("giftsTitle")}</h2>
       <Ornament />
       <div className="space-y-5 text-muted-foreground">
-        <p>{messages.gifts.intro}</p>
-        <p>{messages.gifts.envelope}</p>
-        <p className="italic">{messages.gifts.danceNote}</p>
+        <p>{pickText(messages.gifts.intro, lang)}</p>
+        <p>{pickText(messages.gifts.envelope, lang)}</p>
+        <p className="italic">{pickText(messages.gifts.danceNote, lang)}</p>
         {messages.gifts.telegramGroupUrl && (
           <a
             href={messages.gifts.telegramGroupUrl}
@@ -536,7 +539,7 @@ function Gifts({ lang }: { lang: Lang }) {
             rel="noreferrer"
             className="inline-block rounded-full border border-foreground/20 px-5 py-2.5 text-sm text-foreground transition hover:bg-foreground hover:text-background"
           >
-            Telegram →
+            {t("telegramGroup")} →
           </a>
         )}
       </div>
@@ -556,7 +559,9 @@ function Closing({ lang }: { lang: Lang }) {
       <div className="reveal relative mx-auto max-w-xl px-6">
         <Heart className="mx-auto h-5 w-5 fill-primary text-primary" />
         <h2 className="mt-6 font-serif text-4xl">{t("closingTitle")}</h2>
-        <p className="mt-6 leading-relaxed text-muted-foreground">{messages.closing}</p>
+        <p className="mt-6 leading-relaxed text-muted-foreground">
+          {pickText(messages.closing, lang)}
+        </p>
         <p className="mt-10 eyebrow">{t("closingSign")}</p>
         <p className="mt-3 font-serif text-2xl">
           {wedding.couple.nameA} & {wedding.couple.nameB}
@@ -570,7 +575,13 @@ function Closing({ lang }: { lang: Lang }) {
 function Share({ lang }: { lang: Lang }) {
   const t = useT(lang);
   const [copied, setCopied] = useState(false);
-  const url = wedding.share.url || (typeof window !== "undefined" ? window.location.href : "");
+  const [url, setUrl] = useState(wedding.share.url);
+
+  useEffect(() => {
+    if (!wedding.share.url && typeof window !== "undefined") {
+      setUrl(window.location.href);
+    }
+  }, []);
 
   const onCopy = async () => {
     try {
@@ -582,7 +593,7 @@ function Share({ lang }: { lang: Lang }) {
     }
   };
 
-  const text = `${wedding.couple.nameA} & ${wedding.couple.nameB} — ${i18n[lang].invitationLine}`;
+  const text = `${wedding.couple.nameA} & ${wedding.couple.nameB} — ${t("invitationLine")}`;
 
   return (
     <Section className="text-center">
@@ -597,7 +608,7 @@ function Share({ lang }: { lang: Lang }) {
           rel="noreferrer"
           className="rounded-full border border-foreground/20 px-5 py-2.5 text-sm transition hover:bg-foreground hover:text-background"
         >
-          Telegram
+          {t("shareTelegram")}
         </a>
         <a
           href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`}
@@ -605,7 +616,7 @@ function Share({ lang }: { lang: Lang }) {
           rel="noreferrer"
           className="rounded-full border border-foreground/20 px-5 py-2.5 text-sm transition hover:bg-foreground hover:text-background"
         >
-          WhatsApp
+          {t("shareWhatsApp")}
         </a>
         <button
           onClick={onCopy}
@@ -620,17 +631,46 @@ function Share({ lang }: { lang: Lang }) {
 }
 
 // ---------- Page ----------
+const LANG_STORAGE_KEY = "wedding.lang";
+
 export default function Invitation() {
-  const [lang, setLang] = useState<Lang>(wedding.language.default);
+  const [lang, setLangState] = useState<Lang>(wedding.language.default);
   const [unlocked, setUnlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
+
+  // Restore stored language preference (client-only to avoid hydration mismatch).
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+      if (stored && wedding.language.available.includes(stored)) {
+        setLangState(stored);
+      }
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  // Sync <html lang> for screen readers and out-of-tree boundaries.
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = htmlLang[lang];
+    }
+  }, [lang]);
+
+  const setLang = (l: Lang) => {
+    setLangState(l);
+    try {
+      localStorage.setItem(LANG_STORAGE_KEY, l);
+    } catch {
+      /* noop */
+    }
+  };
 
   const musicAvailable = wedding.features.music && !!wedding.music.src;
 
   const onUnlock = () => {
     setUnlocked(true);
-    // smooth scroll past the hero
     setTimeout(() => {
       document.getElementById("greeting")?.scrollIntoView({ behavior: "smooth" });
     }, 400);
