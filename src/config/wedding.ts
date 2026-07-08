@@ -1,8 +1,6 @@
 // All client-specific content lives here. Duplicate the project,
 // edit this file, swap images in /public/wedding/, and publish.
 
-import songAsset from "../../public/wedding/song.mp3.asset.json";
-
 export type Lang = "uz" | "uz-cyrl" | "ru" | "en";
 
 export const wedding = {
@@ -43,7 +41,7 @@ export const wedding = {
   },
 
   music: {
-    src: songAsset.url,
+    src: "/wedding/song.mp3",
   },
 
   share: {
