@@ -610,14 +610,17 @@ function Share({ lang }: { lang: Lang }) {
         >
           {t("shareTelegram")}
         </a>
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`}
-          target="_blank"
-          rel="noreferrer"
+        <button
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(text + " " + url);
+            } catch { /* noop */ }
+            window.open(wedding.share.instagram, "_blank", "noopener,noreferrer");
+          }}
           className="rounded-full border border-foreground/20 px-5 py-2.5 text-sm transition hover:bg-foreground hover:text-background"
         >
-          {t("shareWhatsApp")}
-        </a>
+          {t("shareInstagram")}
+        </button>
         <button
           onClick={onCopy}
           className="inline-flex items-center gap-2 rounded-full border border-foreground/20 px-5 py-2.5 text-sm transition hover:bg-foreground hover:text-background"
