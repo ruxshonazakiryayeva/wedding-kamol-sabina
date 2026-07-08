@@ -321,8 +321,8 @@ function Details({ lang }: { lang: Lang }) {
   const rows = [
     { label: t("address"), value: `${wedding.venue.name}, ${wedding.venue.city}, ${wedding.venue.addressLine}`, link: wedding.venue.mapsGoogle, linkLabel: t("openMap") },
     { label: t("time"), value: `${wedding.date.displayDate} · ${wedding.date.displayTime}`, sub: `${t("doorsOpen")} ${wedding.date.doorsOpenTime}` },
-    { label: t("dressCode"), value: wedding.dressCode },
-    { label: t("format"), value: wedding.format },
+    { label: t("dressCode"), value: pickText(messages.dressCodeValue, lang) },
+    { label: t("format"), value: pickText(messages.formatValue, lang) },
   ];
   return (
     <Section id="details">
