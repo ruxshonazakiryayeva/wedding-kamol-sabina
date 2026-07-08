@@ -1,13 +1,15 @@
 // All client-specific content lives here. Duplicate the project,
 // edit this file, swap images in /public/wedding/, and publish.
 
+import songAsset from "../../public/wedding/song.mp3.asset.json";
+
 export type Lang = "uz" | "uz-cyrl" | "ru" | "en";
 
 export const wedding = {
   couple: {
-    nameA: "Timur",
-    nameB: "Safiya",
-    monogram: "T & S",
+    nameA: "Kamol",
+    nameB: "Sabina",
+    monogram: "K & S",
   },
   // ISO date in local time of the venue
   date: {
@@ -20,12 +22,10 @@ export const wedding = {
     name: "AFROSIYOB Restaurant",
     addressLine: "Istiqlol Street, 10",
     city: "Fergana",
-    mapsGoogle: "https://maps.app.goo.gl/cKjb942EuHE5e1ry8",
+    mapsGoogle: "https://maps.app.goo.gl/gCBUsmYiwMJcoMZP9",
     mapsYandex: "https://yandex.uz/maps/-/CPa~6L7k",
-    route: "https://yandex.uz/maps/-/CPa~6L7k",
+    route: "https://maps.app.goo.gl/gCBUsmYiwMJcoMZP9",
   },
-  dressCode: "Formal — light tones preferred",
-  format: "Halal · alcohol-free celebration",
 
   photos: {
     heroBg: "/wedding/hero.jpg",
@@ -34,22 +34,30 @@ export const wedding = {
     venueInterior: "/wedding/venue-interior.jpg",
     closingBg: "/wedding/closing.jpg",
     ogImage: "/wedding/hero.jpg",
+    loveStory: [
+      "/wedding/love-rings.jpg",
+      "/wedding/love-doves.jpg",
+      "/wedding/love-couple.jpg",
+      "/wedding/love-bouquet.jpg",
+    ],
   },
 
   music: {
-    src: "", // e.g. "/wedding/song.mp3" — leave empty to hide
+    src: songAsset.url,
   },
 
   share: {
-    url: "", // leave empty to use window.location at runtime
+    url: "",
+    instagram: "https://www.instagram.com/",
   },
 
   features: {
-    music: false,
+    music: true,
     countdown: true,
     calendar: true,
     rsvp: true,
     guestList: false,
+    loveStory: true,
   },
 
   language: {
@@ -58,7 +66,6 @@ export const wedding = {
   },
 };
 
-// Switcher chip labels.
 export const langLabels: Record<Lang, string> = {
   uz: "UZ",
   "uz-cyrl": "УЗ",
@@ -66,7 +73,6 @@ export const langLabels: Record<Lang, string> = {
   en: "EN",
 };
 
-// HTML lang attribute values per locale.
 export const htmlLang: Record<Lang, string> = {
   uz: "uz-Latn",
   "uz-cyrl": "uz-Cyrl",
@@ -74,7 +80,6 @@ export const htmlLang: Record<Lang, string> = {
   en: "en",
 };
 
-// Calendar localisation: month names + weekday short labels (Mon..Sun).
 export const calendarStrings: Record<
   Lang,
   { months: string[]; weekdays: string[] }
@@ -109,7 +114,6 @@ export const calendarStrings: Record<
   },
 };
 
-// UI labels per language. Couple-specific text (names, address, etc.) is shared.
 export const i18n: Record<Lang, Record<string, string>> = {
   uz: {
     invitation: "Sizga taklifnoma keldi",
@@ -126,8 +130,10 @@ export const i18n: Record<Lang, Record<string, string>> = {
     calendarTitle: "Toʻy kalendari",
     calendarNote: "yurak — toʻy kuni",
     greetingEyebrow: "Hurmatli mehmonlar",
-    greetingBody:
-      "Biz uchun aziz boʻlgan ushbu kunni siz bilan birga nishonlashni istaymiz. Quvonchimizga sherik boʻlishingizdan mamnun boʻlamiz.",
+    loveStoryEyebrow: "Sevgi hikoyamiz",
+    loveStoryTitle: "Bizning hikoyamiz",
+    loveStoryBody:
+      "Har bir uchrashuv, har bir tabassum bizni shu kunga olib keldi. Bu hikoyaning eng goʻzal sahifasini siz bilan birga yozamiz.",
     detailsTitle: "Tadbir tafsilotlari",
     address: "Manzil",
     time: "Vaqt",
@@ -156,14 +162,12 @@ export const i18n: Record<Lang, Record<string, string>> = {
     rsvpThanks: "Rahmat! Javobingiz qabul qilindi.",
     giftsTitle: "Mehmonlarga iltimoslar",
     closingTitle: "Toʻyga xush kelibsiz!",
-    closingBody:
-      "Bu baxtli kunda biz bilan birga boʻlganingiz uchun samimiy minnatdorchilik bildiramiz.",
     closingSign: "Hurmat bilan,",
     shareTitle: "Doʻstlaringizga yetkazing",
     shareBody:
       "Taklifnomani yaqinlaringizga ham ulashing — ular ham bizning bayramimizga taklif qilingan!",
     shareTelegram: "Telegram",
-    shareWhatsApp: "WhatsApp",
+    shareInstagram: "Instagram",
     telegramGroup: "Telegram guruh",
     copy: "Nusxa olish",
     copied: "Havola nusxalandi!",
@@ -190,8 +194,10 @@ export const i18n: Record<Lang, Record<string, string>> = {
     calendarTitle: "Тўй календари",
     calendarNote: "юрак — тўй куни",
     greetingEyebrow: "Ҳурматли меҳмонлар",
-    greetingBody:
-      "Биз учун азиз бўлган ушбу кунни сиз билан бирга нишонлашни истаймиз. Қувончимизга шерик бўлишингиздан мамнун бўламиз.",
+    loveStoryEyebrow: "Севги ҳикоямиз",
+    loveStoryTitle: "Бизнинг ҳикоямиз",
+    loveStoryBody:
+      "Ҳар бир учрашув, ҳар бир табассум бизни шу кунга олиб келди. Бу ҳикоянинг энг гўзал саҳифасини сиз билан бирга ёзамиз.",
     detailsTitle: "Тадбир тафсилотлари",
     address: "Манзил",
     time: "Вақт",
@@ -220,14 +226,12 @@ export const i18n: Record<Lang, Record<string, string>> = {
     rsvpThanks: "Раҳмат! Жавобингиз қабул қилинди.",
     giftsTitle: "Меҳмонларга илтимослар",
     closingTitle: "Тўйга хуш келибсиз!",
-    closingBody:
-      "Бу бахтли кунда биз билан бирга бўлганингиз учун самимий миннатдорчилик билдирамиз.",
     closingSign: "Ҳурмат билан,",
     shareTitle: "Дўстларингизга етказинг",
     shareBody:
       "Таклифномани яқинларингизга ҳам улашинг — улар ҳам бизнинг байрамимизга таклиф қилинган!",
     shareTelegram: "Telegram",
-    shareWhatsApp: "WhatsApp",
+    shareInstagram: "Instagram",
     telegramGroup: "Telegram гуруҳ",
     copy: "Нусха олиш",
     copied: "Ҳавола нусхаланди!",
@@ -254,8 +258,10 @@ export const i18n: Record<Lang, Record<string, string>> = {
     calendarTitle: "Календарь свадьбы",
     calendarNote: "сердце — день свадьбы",
     greetingEyebrow: "Уважаемые гости",
-    greetingBody:
-      "Мы хотим разделить этот дорогой для нас день вместе с вами. Будем рады разделить нашу радость.",
+    loveStoryEyebrow: "Наша история любви",
+    loveStoryTitle: "Наша история",
+    loveStoryBody:
+      "Каждая встреча, каждая улыбка привели нас к этому дню. Самую красивую страницу этой истории мы напишем вместе с вами.",
     detailsTitle: "Детали торжества",
     address: "Адрес",
     time: "Время",
@@ -284,14 +290,12 @@ export const i18n: Record<Lang, Record<string, string>> = {
     rsvpThanks: "Спасибо! Ваш ответ принят.",
     giftsTitle: "Просьбы к гостям",
     closingTitle: "Добро пожаловать на свадьбу!",
-    closingBody:
-      "Сердечно благодарим за то, что вы рядом с нами в этот счастливый день.",
     closingSign: "С уважением,",
     shareTitle: "Поделитесь с близкими",
     shareBody:
       "Передайте приглашение близким — они тоже приглашены на наш праздник!",
     shareTelegram: "Telegram",
-    shareWhatsApp: "WhatsApp",
+    shareInstagram: "Instagram",
     telegramGroup: "Telegram-группа",
     copy: "Скопировать",
     copied: "Ссылка скопирована!",
@@ -318,8 +322,10 @@ export const i18n: Record<Lang, Record<string, string>> = {
     calendarTitle: "Wedding calendar",
     calendarNote: "heart — the wedding day",
     greetingEyebrow: "Dear guests",
-    greetingBody:
-      "We would love to celebrate this precious day together with you. It would mean the world to share our joy with you.",
+    loveStoryEyebrow: "Our love story",
+    loveStoryTitle: "Our story",
+    loveStoryBody:
+      "Every meeting, every smile brought us to this day. We will write the most beautiful page of this story together with you.",
     detailsTitle: "Event details",
     address: "Address",
     time: "Time",
@@ -348,14 +354,12 @@ export const i18n: Record<Lang, Record<string, string>> = {
     rsvpThanks: "Thank you! Your response was received.",
     giftsTitle: "A note to our guests",
     closingTitle: "Welcome to our wedding!",
-    closingBody:
-      "Thank you sincerely for being with us on this happy day.",
     closingSign: "With love,",
     shareTitle: "Share with loved ones",
     shareBody:
       "Forward this invitation — your loved ones are invited to our celebration too!",
     shareTelegram: "Telegram",
-    shareWhatsApp: "WhatsApp",
+    shareInstagram: "Instagram",
     telegramGroup: "Telegram group",
     copy: "Copy link",
     copied: "Link copied!",
@@ -369,8 +373,6 @@ export const i18n: Record<Lang, Record<string, string>> = {
   },
 };
 
-// Per-client greeting / closing / gifts text, translated per locale.
-// Leave a locale blank ("") to fall back to the default language.
 type LocalisedText = Record<Lang, string>;
 
 export const messages = {
@@ -380,6 +382,18 @@ export const messages = {
       "Биз учун азиз бўлган ушбу кунни сиз билан бирга нишонлашни истаймиз. Қувончимизга шерик бўлишингиздан мамнун бўламиз.",
     ru: "Мы хотим разделить этот дорогой для нас день вместе с вами. Будем рады разделить нашу радость.",
     en: "We would love to celebrate this precious day together with you. It would mean the world to share our joy with you.",
+  } satisfies LocalisedText,
+  dressCodeValue: {
+    uz: "Rasmiy — och tusdagi kiyimlar afzal",
+    "uz-cyrl": "Расмий — оч тусдаги кийимлар афзал",
+    ru: "Официальный — предпочтительны светлые тона",
+    en: "Formal — light tones preferred",
+  } satisfies LocalisedText,
+  formatValue: {
+    uz: "Halol · alkogolsiz tantana",
+    "uz-cyrl": "Ҳалол · алкоголсиз тантана",
+    ru: "Халяльное торжество без алкоголя",
+    en: "Halal · alcohol-free celebration",
   } satisfies LocalisedText,
   gifts: {
     intro: {
@@ -414,12 +428,10 @@ export const messages = {
   } satisfies LocalisedText,
 };
 
-// Pick a localised string with safe fallback to the default language, then "".
 export function pickText(text: LocalisedText, lang: Lang): string {
   return text[lang] || text[wedding.language.default] || text.en || "";
 }
 
-// Translation lookup with fallback to the default language.
 export function t(lang: Lang, key: string): string {
   return (
     i18n[lang]?.[key] ||

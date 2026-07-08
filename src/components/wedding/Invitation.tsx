@@ -254,6 +254,39 @@ function Greeting({ lang }: { lang: Lang }) {
   );
 }
 
+// ---------- Love Story ----------
+function LoveStory({ lang }: { lang: Lang }) {
+  const t = useT(lang);
+  const photos = wedding.photos.loveStory;
+  return (
+    <Section id="love-story" className="text-center">
+      <Eyebrow>{t("loveStoryEyebrow")}</Eyebrow>
+      <h2 className="mt-3 font-serif text-3xl sm:text-4xl">{t("loveStoryTitle")}</h2>
+      <Ornament />
+      <p className="mx-auto mb-10 max-w-md text-base leading-relaxed text-muted-foreground">
+        {t("loveStoryBody")}
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {photos.map((src, i) => (
+          <figure
+            key={src}
+            className={`overflow-hidden rounded-md ${i % 2 === 1 ? "sm:mt-8" : ""}`}
+          >
+            <div className="aspect-[4/5] overflow-hidden bg-muted">
+              <img
+                src={src}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover transition duration-700 hover:scale-105"
+              />
+            </div>
+          </figure>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 // ---------- Calendar ----------
 function Calendar({ lang }: { lang: Lang }) {
   const t = useT(lang);
@@ -321,8 +354,8 @@ function Details({ lang }: { lang: Lang }) {
   const rows = [
     { label: t("address"), value: `${wedding.venue.name}, ${wedding.venue.city}, ${wedding.venue.addressLine}`, link: wedding.venue.mapsGoogle, linkLabel: t("openMap") },
     { label: t("time"), value: `${wedding.date.displayDate} · ${wedding.date.displayTime}`, sub: `${t("doorsOpen")} ${wedding.date.doorsOpenTime}` },
-    { label: t("dressCode"), value: wedding.dressCode },
-    { label: t("format"), value: wedding.format },
+    { label: t("dressCode"), value: pickText(messages.dressCodeValue, lang) },
+    { label: t("format"), value: pickText(messages.formatValue, lang) },
   ];
   return (
     <Section id="details">
@@ -610,14 +643,17 @@ function Share({ lang }: { lang: Lang }) {
         >
           {t("shareTelegram")}
         </a>
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`}
-          target="_blank"
-          rel="noreferrer"
+        <button
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(text + " " + url);
+            } catch { /* noop */ }
+            window.open(wedding.share.instagram, "_blank", "noopener,noreferrer");
+          }}
           className="rounded-full border border-foreground/20 px-5 py-2.5 text-sm transition hover:bg-foreground hover:text-background"
         >
-          {t("shareWhatsApp")}
-        </a>
+          {t("shareInstagram")}
+        </button>
         <button
           onClick={onCopy}
           className="inline-flex items-center gap-2 rounded-full border border-foreground/20 px-5 py-2.5 text-sm transition hover:bg-foreground hover:text-background"
@@ -707,6 +743,7 @@ export default function Invitation() {
       <div id="greeting">
         <Greeting lang={lang} />
       </div>
+      {wedding.features.loveStory && <LoveStory lang={lang} />}
       {wedding.features.countdown && <Countdown lang={lang} />}
       {wedding.features.calendar && <Calendar lang={lang} />}
       <Details lang={lang} />
