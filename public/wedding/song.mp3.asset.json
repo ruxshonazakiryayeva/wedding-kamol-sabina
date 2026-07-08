@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "asset_id": "fc835ba8-f789-4553-ae79-7f482187f980",
+  "asset_id": "54a8d9dd-9068-479b-a8de-8df5bd32b6a0",
   "project_id": "8ee7e74f-5bd6-41fb-b6f7-cb1f4227fac9",
-  "url": "/__l5e/assets-v1/fc835ba8-f789-4553-ae79-7f482187f980/smooth-operator.mp3",
-  "r2_key": "a/v1/8ee7e74f-5bd6-41fb-b6f7-cb1f4227fac9/fc835ba8-f789-4553-ae79-7f482187f980/smooth-operator.mp3",
+  "url": "/__l5e/assets-v1/54a8d9dd-9068-479b-a8de-8df5bd32b6a0/smooth-operator.mp3",
+  "r2_key": "a/v1/8ee7e74f-5bd6-41fb-b6f7-cb1f4227fac9/54a8d9dd-9068-479b-a8de-8df5bd32b6a0/smooth-operator.mp3",
   "original_filename": "smooth-operator.mp3",
   "size": 4278084,
-  "content_type": "video/webm",
-  "created_at": "2026-07-08T03:48:15Z"
+  "content_type": "audio/mpeg",
+  "created_at": "2026-07-08T03:48:47Z"
 }
