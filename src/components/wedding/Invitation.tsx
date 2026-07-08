@@ -254,6 +254,39 @@ function Greeting({ lang }: { lang: Lang }) {
   );
 }
 
+// ---------- Love Story ----------
+function LoveStory({ lang }: { lang: Lang }) {
+  const t = useT(lang);
+  const photos = wedding.photos.loveStory;
+  return (
+    <Section id="love-story" className="text-center">
+      <Eyebrow>{t("loveStoryEyebrow")}</Eyebrow>
+      <h2 className="mt-3 font-serif text-3xl sm:text-4xl">{t("loveStoryTitle")}</h2>
+      <Ornament />
+      <p className="mx-auto mb-10 max-w-md text-base leading-relaxed text-muted-foreground">
+        {t("loveStoryBody")}
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {photos.map((src, i) => (
+          <figure
+            key={src}
+            className={`overflow-hidden rounded-md ${i % 2 === 1 ? "sm:mt-8" : ""}`}
+          >
+            <div className="aspect-[4/5] overflow-hidden bg-muted">
+              <img
+                src={src}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover transition duration-700 hover:scale-105"
+              />
+            </div>
+          </figure>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 // ---------- Calendar ----------
 function Calendar({ lang }: { lang: Lang }) {
   const t = useT(lang);
