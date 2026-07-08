@@ -743,6 +743,7 @@ export default function Invitation() {
       <div id="greeting">
         <Greeting lang={lang} />
       </div>
+      {wedding.features.loveStory && <LoveStory lang={lang} />}
       {wedding.features.countdown && <Countdown lang={lang} />}
       {wedding.features.calendar && <Calendar lang={lang} />}
       <Details lang={lang} />
