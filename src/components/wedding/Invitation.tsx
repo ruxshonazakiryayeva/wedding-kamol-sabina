@@ -733,15 +733,25 @@ type RsvpRow = {
   created_at: string;
 };
 
-function AdminKeyButton({ onClick }: { onClick: () => void }) {
+function BottomButtons({ onAdminClick }: { onAdminClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      aria-label="Admin panel"
-      className="fixed bottom-4 left-4 z-40 rounded-full bg-background/70 p-2.5 text-foreground/50 backdrop-blur-md shadow-sm transition hover:text-foreground"
-    >
-      <KeyRound className="h-4 w-4" />
-    </button>
+    <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2">
+      <button
+        onClick={onAdminClick}
+        aria-label="Admin panel"
+        className="rounded-full bg-background/70 p-2.5 text-foreground/50 backdrop-blur-md shadow-sm transition hover:text-foreground"
+      >
+        <KeyRound className="h-4 w-4" />
+      </button>
+      <a
+        href="https://webinvite-six.vercel.app/"
+        target="_blank"
+        rel="noreferrer"
+        className="rounded-full bg-primary px-5 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm transition hover:bg-primary/90"
+      >
+        WI
+      </a>
+    </div>
   );
 }
 
@@ -904,7 +914,7 @@ function AdminPanel() {
   const [password, setPassword] = useState("");
 
   if (step === "closed") {
-    return <AdminKeyButton onClick={() => setStep("password")} />;
+    return <BottomButtons onAdminClick={() => setStep("password")} />;
   }
 
   if (step === "password") {
