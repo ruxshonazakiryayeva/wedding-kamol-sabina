@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Heart, Lock, MapPin, Music2, VolumeX, Copy, Send } from "lucide-react";
+import {
+  Heart,
+  Lock,
+  MapPin,
+  Music2,
+  VolumeX,
+  Copy,
+  Send,
+  KeyRound,
+  X,
+  Loader2,
+} from "lucide-react";
 import {
   wedding,
   messages,
@@ -7,9 +18,11 @@ import {
   htmlLang,
   calendarStrings,
   pickText,
+  formatEventDate,
   t as tr,
   type Lang,
 } from "@/config/wedding";
+import { submitRsvp, adminLogin, getRsvpResponses } from "@/lib/api/rsvp.functions";
 
 // ---------- helpers ----------
 function useT(lang: Lang) {
@@ -71,21 +84,60 @@ function Ornament() {
   );
 }
 
-// ---------- Hero (locked) ----------
-function Hero({
+// ---------- Top bar (fixed — stays visible while scrolling) ----------
+function TopBar({
   lang,
   setLang,
-  onUnlock,
-  unlocked,
   music,
   toggleMusic,
 }: {
   lang: Lang;
   setLang: (l: Lang) => void;
-  onUnlock: () => void;
-  unlocked: boolean;
   music: { available: boolean; playing: boolean };
   toggleMusic: () => void;
+}) {
+  const t = useT(lang);
+  return (
+    <div className="fixed top-4 left-0 right-0 z-40 flex items-center justify-between px-4">
+      {music.available ? (
+        <button
+          onClick={toggleMusic}
+          aria-label={t("toggleMusic")}
+          className="rounded-full bg-background/70 p-2 backdrop-blur-md shadow-sm"
+        >
+          {music.playing ? <Music2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+        </button>
+      ) : (
+        <span />
+      )}
+      <div className="flex gap-1 rounded-full bg-background/70 p-1 backdrop-blur-md shadow-sm">
+        {wedding.language.available.map((l) => (
+          <button
+            key={l}
+            onClick={() => setLang(l)}
+            className={`rounded-full px-2.5 py-1 text-xs uppercase tracking-wider transition ${
+              lang === l
+                ? "bg-foreground text-background"
+                : "text-foreground/70 hover:text-foreground"
+            }`}
+          >
+            {langLabels[l]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Hero (locked) ----------
+function Hero({
+  lang,
+  onUnlock,
+  unlocked,
+}: {
+  lang: Lang;
+  onUnlock: () => void;
+  unlocked: boolean;
 }) {
   const t = useT(lang);
   return (
@@ -98,36 +150,6 @@ function Hero({
       }}
     >
       <div className="absolute inset-0 bg-background/30" />
-
-      {/* Top bar */}
-      <div className="absolute top-4 left-0 right-0 z-10 flex items-center justify-between px-4">
-        {music.available ? (
-          <button
-            onClick={toggleMusic}
-            aria-label={t("toggleMusic")}
-            className="rounded-full bg-background/70 p-2 backdrop-blur-md shadow-sm"
-          >
-            {music.playing ? <Music2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-          </button>
-        ) : (
-          <span />
-        )}
-        <div className="flex gap-1 rounded-full bg-background/70 p-1 backdrop-blur-md shadow-sm">
-          {wedding.language.available.map((l) => (
-            <button
-              key={l}
-              onClick={() => setLang(l)}
-              className={`rounded-full px-2.5 py-1 text-xs uppercase tracking-wider transition ${
-                lang === l
-                  ? "bg-foreground text-background"
-                  : "text-foreground/70 hover:text-foreground"
-              }`}
-            >
-              {langLabels[l]}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* Heart card */}
       <div
@@ -163,9 +185,7 @@ function Hero({
             >
               <Lock className="h-5 w-5" />
             </button>
-            <p className="mt-5 max-w-[14rem] text-xs text-muted-foreground">
-              {t("unlock")}
-            </p>
+            <p className="mt-5 max-w-[14rem] text-xs text-muted-foreground">{t("unlock")}</p>
           </div>
         </div>
       </div>
@@ -213,9 +233,7 @@ function Countdown({ lang }: { lang: Lang }) {
               <div className="eyebrow mt-2">{label}</div>
             </div>
             {i < items.length - 1 && (
-              <span className="font-serif text-3xl text-muted-foreground sm:text-5xl">
-                :
-              </span>
+              <span className="font-serif text-3xl text-muted-foreground sm:text-5xl">:</span>
             )}
           </div>
         ))}
@@ -247,9 +265,7 @@ function Greeting({ lang }: { lang: Lang }) {
       <p className="mx-auto max-w-md text-base leading-relaxed text-muted-foreground">
         {pickText(messages.greeting, lang)}
       </p>
-      <p className="mt-6 text-sm italic text-muted-foreground">
-        {t("weAreThankful")}
-      </p>
+      <p className="mt-6 text-sm italic text-muted-foreground">{t("weAreThankful")}</p>
     </Section>
   );
 }
@@ -352,8 +368,17 @@ function Calendar({ lang }: { lang: Lang }) {
 function Details({ lang }: { lang: Lang }) {
   const t = useT(lang);
   const rows = [
-    { label: t("address"), value: `${wedding.venue.name}, ${wedding.venue.city}, ${wedding.venue.addressLine}`, link: wedding.venue.mapsGoogle, linkLabel: t("openMap") },
-    { label: t("time"), value: `${wedding.date.displayDate} · ${wedding.date.displayTime}`, sub: `${t("doorsOpen")} ${wedding.date.doorsOpenTime}` },
+    {
+      label: t("address"),
+      value: `${wedding.venue.name}, ${wedding.venue.city}, ${wedding.venue.addressLine}`,
+      link: wedding.venue.mapsGoogle,
+      linkLabel: t("openMap"),
+    },
+    {
+      label: t("time"),
+      value: `${formatEventDate(lang, wedding.date.iso)} · ${wedding.date.displayTime}`,
+      sub: `${t("doorsOpen")} ${wedding.date.doorsOpenTime}`,
+    },
     { label: t("dressCode"), value: pickText(messages.dressCodeValue, lang) },
     { label: t("format"), value: pickText(messages.formatValue, lang) },
   ];
@@ -458,10 +483,31 @@ function RSVP({ lang }: { lang: Lang }) {
   const [count, setCount] = useState(1);
   const [attending, setAttending] = useState<"yes" | "no" | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [comment, setComment] = useState("");
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!attending || submitting) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await submitRsvp({
+        data: {
+          name,
+          guestCount: count,
+          attending,
+          comment,
+        },
+      });
+      setSubmitted(true);
+    } catch {
+      setError(t("rsvpError"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -481,6 +527,8 @@ function RSVP({ lang }: { lang: Lang }) {
             <input
               required
               name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="mt-2 w-full rounded-md border border-input bg-card px-4 py-3 text-base outline-none focus:border-primary"
             />
           </div>
@@ -503,9 +551,7 @@ function RSVP({ lang }: { lang: Lang }) {
               >
                 +
               </button>
-              <span className="ml-2 text-xs text-muted-foreground">
-                {t("guestCountRange")}
-              </span>
+              <span className="ml-2 text-xs text-muted-foreground">{t("guestCountRange")}</span>
             </div>
           </div>
 
@@ -534,16 +580,25 @@ function RSVP({ lang }: { lang: Lang }) {
             <textarea
               name="comment"
               rows={3}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
               className="mt-2 w-full rounded-md border border-input bg-card px-4 py-3 text-base outline-none focus:border-primary"
             />
           </div>
 
+          {error && <p className="text-center text-sm text-destructive">{error}</p>}
+
           <button
             type="submit"
-            disabled={!attending}
+            disabled={!attending || submitting}
             className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-foreground py-3.5 text-sm font-medium uppercase tracking-widest text-background transition hover:bg-foreground/85 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Send className="h-4 w-4" /> {t("submit")}
+            {submitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+            {t("submit")}
           </button>
 
           <p className="text-center text-xs text-muted-foreground">{t("required")}</p>
@@ -647,7 +702,9 @@ function Share({ lang }: { lang: Lang }) {
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(text + " " + url);
-            } catch { /* noop */ }
+            } catch {
+              /* noop */
+            }
             window.open(wedding.share.instagram, "_blank", "noopener,noreferrer");
           }}
           className="rounded-full border border-foreground/20 px-5 py-2.5 text-sm transition hover:bg-foreground hover:text-background"
@@ -663,6 +720,213 @@ function Share({ lang }: { lang: Lang }) {
         </button>
       </div>
     </Section>
+  );
+}
+
+// ---------- Admin panel ----------
+type RsvpRow = {
+  id: string;
+  name: string;
+  guest_count: number;
+  attending: "yes" | "no";
+  comment: string | null;
+  created_at: string;
+};
+
+function AdminKeyButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Admin panel"
+      className="fixed bottom-4 left-4 z-40 rounded-full bg-background/70 p-2.5 text-foreground/50 backdrop-blur-md shadow-sm transition hover:text-foreground"
+    >
+      <KeyRound className="h-4 w-4" />
+    </button>
+  );
+}
+
+function AdminPasswordModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: (password: string) => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setChecking(true);
+    setError(null);
+    try {
+      await adminLogin({ data: { password } });
+      onSuccess(password);
+    } catch {
+      setError("Parol noto'g'ri");
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-sm rounded-2xl bg-card p-8 text-center shadow-xl"
+      >
+        <h3 className="font-serif text-2xl text-primary">Admin panel</h3>
+        <label className="eyebrow mt-6 block text-left">PAROL</label>
+        <input
+          autoFocus
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mt-2 w-full rounded-md border border-input bg-background px-4 py-3 text-base outline-none focus:border-primary"
+        />
+        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-input py-2.5 text-sm font-medium transition hover:bg-accent"
+          >
+            Yopish
+          </button>
+          <button
+            type="submit"
+            disabled={checking || !password}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {checking && <Loader2 className="h-4 w-4 animate-spin" />}
+            Kirish
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function AdminDashboard({ password, onClose }: { password: string; onClose: () => void }) {
+  const [rows, setRows] = useState<RsvpRow[] | null>(null);
+  const [totalResponses, setTotalResponses] = useState(0);
+  const [totalGuests, setTotalGuests] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getRsvpResponses({ data: { password } })
+      .then((res) => {
+        if (cancelled) return;
+        setRows(res.rows as RsvpRow[]);
+        setTotalResponses(res.totalResponses);
+        setTotalGuests(res.totalGuests);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Ma'lumotlarni yuklab bo'lmadi");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [password]);
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background px-4 py-10 sm:px-8">
+      <div className="mx-auto max-w-3xl">
+        <div className="flex items-center justify-between">
+          <h1 className="font-serif text-3xl text-primary">Admin panel</h1>
+          <button
+            onClick={onClose}
+            className="rounded-full border border-input px-5 py-2 text-sm font-medium transition hover:bg-accent"
+          >
+            Yopish
+          </button>
+        </div>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl bg-card p-8 text-center shadow-sm">
+            <div className="font-serif text-4xl text-primary">{totalResponses}</div>
+            <div className="mt-2 text-sm text-muted-foreground">Javoblar</div>
+          </div>
+          <div className="rounded-2xl bg-card p-8 text-center shadow-sm">
+            <div className="font-serif text-4xl text-primary">{totalGuests}</div>
+            <div className="mt-2 text-sm text-muted-foreground">Jami mehmonlar</div>
+          </div>
+        </div>
+
+        {error && <p className="mt-6 text-center text-sm text-destructive">{error}</p>}
+
+        <div className="mt-8 space-y-4">
+          {rows === null && !error && (
+            <p className="text-center text-sm text-muted-foreground">Yuklanmoqda…</p>
+          )}
+          {rows?.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground">Hozircha javoblar yo'q</p>
+          )}
+          {rows?.map((r) => (
+            <div key={r.id} className="rounded-2xl bg-card p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="font-serif text-lg">{r.name}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {new Date(r.created_at).toLocaleString("uz-UZ")}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      r.attending === "yes"
+                        ? "bg-primary/15 text-primary"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {r.attending === "yes" ? "Ha, albatta" : "Afsuski, yo'q"}
+                  </span>
+                  {r.attending === "yes" && r.guest_count > 1 && (
+                    <span className="text-xs text-muted-foreground">x {r.guest_count}</span>
+                  )}
+                </div>
+              </div>
+              {r.comment && (
+                <p className="mt-4 text-sm italic text-muted-foreground">{r.comment}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminPanel() {
+  const [step, setStep] = useState<"closed" | "password" | "dashboard">("closed");
+  const [password, setPassword] = useState("");
+
+  if (step === "closed") {
+    return <AdminKeyButton onClick={() => setStep("password")} />;
+  }
+
+  if (step === "password") {
+    return (
+      <AdminPasswordModal
+        onClose={() => setStep("closed")}
+        onSuccess={(pw) => {
+          setPassword(pw);
+          setStep("dashboard");
+        }}
+      />
+    );
+  }
+
+  return (
+    <AdminDashboard
+      password={password}
+      onClose={() => {
+        setStep("closed");
+        setPassword("");
+      }}
+    />
   );
 }
 
@@ -705,13 +969,28 @@ export default function Invitation() {
 
   const musicAvailable = wedding.features.music && !!wedding.music.src;
 
+  // Lock page scroll until the guest taps the lock icon, so the rest of the
+  // invitation can't be scrolled to before it's "unlocked".
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.style.overflow = unlocked ? "" : "hidden";
+    document.body.style.overflow = unlocked ? "" : "hidden";
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [unlocked]);
+
   const onUnlock = () => {
     setUnlocked(true);
     setTimeout(() => {
       document.getElementById("greeting")?.scrollIntoView({ behavior: "smooth" });
     }, 400);
     if (musicAvailable && audioRef.current) {
-      audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
+      audioRef.current
+        .play()
+        .then(() => setPlaying(true))
+        .catch(() => {});
     }
   };
 
@@ -719,7 +998,9 @@ export default function Invitation() {
     const a = audioRef.current;
     if (!a) return;
     if (a.paused) {
-      a.play().then(() => setPlaying(true)).catch(() => {});
+      a.play()
+        .then(() => setPlaying(true))
+        .catch(() => {});
     } else {
       a.pause();
       setPlaying(false);
@@ -728,17 +1009,14 @@ export default function Invitation() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <Hero
+      <TopBar
         lang={lang}
         setLang={setLang}
-        onUnlock={onUnlock}
-        unlocked={unlocked}
         music={{ available: musicAvailable, playing }}
         toggleMusic={toggleMusic}
       />
-      {musicAvailable && (
-        <audio ref={audioRef} src={wedding.music.src} loop preload="none" />
-      )}
+      <Hero lang={lang} onUnlock={onUnlock} unlocked={unlocked} />
+      {musicAvailable && <audio ref={audioRef} src={wedding.music.src} loop preload="none" />}
 
       <div id="greeting">
         <Greeting lang={lang} />
@@ -753,6 +1031,8 @@ export default function Invitation() {
       <Gifts lang={lang} />
       <Closing lang={lang} />
       <Share lang={lang} />
+
+      <AdminPanel />
     </main>
   );
 }
