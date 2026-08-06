@@ -11,8 +11,7 @@ export const wedding = {
   },
   // ISO date in local time of the venue
   date: {
-    iso: "2026-07-25T17:00:00",
-    displayDate: "25 July 2026",
+    iso: "2027-10-10T17:00:00",
     displayTime: "17:00",
     doorsOpenTime: "16:30",
   },
@@ -78,35 +77,72 @@ export const htmlLang: Record<Lang, string> = {
   en: "en",
 };
 
-export const calendarStrings: Record<
-  Lang,
-  { months: string[]; weekdays: string[] }
-> = {
+export const calendarStrings: Record<Lang, { months: string[]; weekdays: string[] }> = {
   uz: {
     months: [
-      "YANVAR", "FEVRAL", "MART", "APREL", "MAY", "IYUN",
-      "IYUL", "AVGUST", "SENTABR", "OKTABR", "NOYABR", "DEKABR",
+      "YANVAR",
+      "FEVRAL",
+      "MART",
+      "APREL",
+      "MAY",
+      "IYUN",
+      "IYUL",
+      "AVGUST",
+      "SENTABR",
+      "OKTABR",
+      "NOYABR",
+      "DEKABR",
     ],
     weekdays: ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"],
   },
   "uz-cyrl": {
     months: [
-      "ЯНВАРЬ", "ФЕВРАЛЬ", "МАРТ", "АПРЕЛЬ", "МАЙ", "ИЮНЬ",
-      "ИЮЛЬ", "АВГУСТ", "СЕНТЯБРЬ", "ОКТЯБРЬ", "НОЯБРЬ", "ДЕКАБРЬ",
+      "ЯНВАРЬ",
+      "ФЕВРАЛЬ",
+      "МАРТ",
+      "АПРЕЛЬ",
+      "МАЙ",
+      "ИЮНЬ",
+      "ИЮЛЬ",
+      "АВГУСТ",
+      "СЕНТЯБРЬ",
+      "ОКТЯБРЬ",
+      "НОЯБРЬ",
+      "ДЕКАБРЬ",
     ],
     weekdays: ["Ду", "Се", "Чо", "Па", "Жу", "Ша", "Як"],
   },
   ru: {
     months: [
-      "ЯНВАРЬ", "ФЕВРАЛЬ", "МАРТ", "АПРЕЛЬ", "МАЙ", "ИЮНЬ",
-      "ИЮЛЬ", "АВГУСТ", "СЕНТЯБРЬ", "ОКТЯБРЬ", "НОЯБРЬ", "ДЕКАБРЬ",
+      "ЯНВАРЬ",
+      "ФЕВРАЛЬ",
+      "МАРТ",
+      "АПРЕЛЬ",
+      "МАЙ",
+      "ИЮНЬ",
+      "ИЮЛЬ",
+      "АВГУСТ",
+      "СЕНТЯБРЬ",
+      "ОКТЯБРЬ",
+      "НОЯБРЬ",
+      "ДЕКАБРЬ",
     ],
     weekdays: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
   },
   en: {
     months: [
-      "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
-      "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
+      "JANUARY",
+      "FEBRUARY",
+      "MARCH",
+      "APRIL",
+      "MAY",
+      "JUNE",
+      "JULY",
+      "AUGUST",
+      "SEPTEMBER",
+      "OCTOBER",
+      "NOVEMBER",
+      "DECEMBER",
     ],
     weekdays: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
   },
@@ -158,6 +194,7 @@ export const i18n: Record<Lang, Record<string, string>> = {
     submit: "Yuborish",
     required: "* Majburiy maydonlar",
     rsvpThanks: "Rahmat! Javobingiz qabul qilindi.",
+    rsvpError: "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
     giftsTitle: "Mehmonlarga iltimoslar",
     closingTitle: "Toʻyga xush kelibsiz!",
     closingSign: "Hurmat bilan,",
@@ -222,6 +259,7 @@ export const i18n: Record<Lang, Record<string, string>> = {
     submit: "Юбориш",
     required: "* Мажбурий майдонлар",
     rsvpThanks: "Раҳмат! Жавобингиз қабул қилинди.",
+    rsvpError: "Хатолик юз берди. Илтимос, қайта уриниб кўринг.",
     giftsTitle: "Меҳмонларга илтимослар",
     closingTitle: "Тўйга хуш келибсиз!",
     closingSign: "Ҳурмат билан,",
@@ -286,12 +324,12 @@ export const i18n: Record<Lang, Record<string, string>> = {
     submit: "Отправить",
     required: "* Обязательные поля",
     rsvpThanks: "Спасибо! Ваш ответ принят.",
+    rsvpError: "Произошла ошибка. Пожалуйста, попробуйте ещё раз.",
     giftsTitle: "Просьбы к гостям",
     closingTitle: "Добро пожаловать на свадьбу!",
     closingSign: "С уважением,",
     shareTitle: "Поделитесь с близкими",
-    shareBody:
-      "Передайте приглашение близким — они тоже приглашены на наш праздник!",
+    shareBody: "Передайте приглашение близким — они тоже приглашены на наш праздник!",
     shareTelegram: "Telegram",
     shareInstagram: "Instagram",
     telegramGroup: "Telegram-группа",
@@ -350,12 +388,12 @@ export const i18n: Record<Lang, Record<string, string>> = {
     submit: "Submit",
     required: "* Required fields",
     rsvpThanks: "Thank you! Your response was received.",
+    rsvpError: "Something went wrong. Please try again.",
     giftsTitle: "A note to our guests",
     closingTitle: "Welcome to our wedding!",
     closingSign: "With love,",
     shareTitle: "Share with loved ones",
-    shareBody:
-      "Forward this invitation — your loved ones are invited to our celebration too!",
+    shareBody: "Forward this invitation — your loved ones are invited to our celebration too!",
     shareTelegram: "Telegram",
     shareInstagram: "Instagram",
     telegramGroup: "Telegram group",
@@ -426,15 +464,93 @@ export const messages = {
   } satisfies LocalisedText,
 };
 
+// Month names for the event date, written the way each language actually
+// reads a full date (not the all-caps calendar header style above).
+const eventDateMonths: Record<Lang, string[]> = {
+  uz: [
+    "yanvar",
+    "fevral",
+    "mart",
+    "aprel",
+    "may",
+    "iyun",
+    "iyul",
+    "avgust",
+    "sentabr",
+    "oktabr",
+    "noyabr",
+    "dekabr",
+  ],
+  "uz-cyrl": [
+    "январ",
+    "феврал",
+    "март",
+    "апрел",
+    "май",
+    "июн",
+    "июл",
+    "август",
+    "сентябр",
+    "октябр",
+    "ноябр",
+    "декабр",
+  ],
+  // Genitive case, as Russian dates require ("10 октября", not "10 октябрь").
+  ru: [
+    "января",
+    "февраля",
+    "марта",
+    "апреля",
+    "мая",
+    "июня",
+    "июля",
+    "августа",
+    "сентября",
+    "октября",
+    "ноября",
+    "декабря",
+  ],
+  en: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ],
+};
+
+// Formats wedding.date.iso for display in the given language, e.g.
+// uz: "10-oktabr 2027", ru: "10 октября 2027", en: "October 10, 2027".
+export function formatEventDate(lang: Lang, iso: string): string {
+  const d = new Date(iso);
+  const day = d.getDate();
+  const year = d.getFullYear();
+  const month = eventDateMonths[lang][d.getMonth()];
+
+  switch (lang) {
+    case "uz":
+    case "uz-cyrl":
+      return `${day}-${month} ${year}`;
+    case "ru":
+      return `${day} ${month} ${year}`;
+    case "en":
+      return `${month} ${day}, ${year}`;
+    default:
+      return `${day} ${month} ${year}`;
+  }
+}
+
 export function pickText(text: LocalisedText, lang: Lang): string {
   return text[lang] || text[wedding.language.default] || text.en || "";
 }
 
 export function t(lang: Lang, key: string): string {
-  return (
-    i18n[lang]?.[key] ||
-    i18n[wedding.language.default]?.[key] ||
-    i18n.en[key] ||
-    key
-  );
+  return i18n[lang]?.[key] || i18n[wedding.language.default]?.[key] || i18n.en[key] || key;
 }
