@@ -19,9 +19,7 @@ function useBoundaryLang(): Lang {
   useEffect(() => {
     if (typeof document === "undefined") return;
     const code = document.documentElement.lang;
-    const match = (Object.entries(htmlLang) as [Lang, string][]).find(
-      ([, v]) => v === code,
-    );
+    const match = (Object.entries(htmlLang) as [Lang, string][]).find(([, v]) => v === code);
     if (match) setLang(match[0]);
   }, []);
   return lang;
@@ -34,9 +32,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">{tr(lang, "notFoundTitle")}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {tr(lang, "notFoundBody")}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{tr(lang, "notFoundBody")}</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -64,9 +60,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           {tr(lang, "errorTitle")}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {tr(lang, "errorBody")}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{tr(lang, "errorBody")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -95,19 +89,41 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Kamol & Sabina" },
-      { name: "description", content: "Ikki qalb birlashayotgan unitilmas lahzaga guvoh bo'ling. To'y oqshomiga sizlarni lutfan taklif etamiz" },
+      {
+        name: "description",
+        content:
+          "Ikki qalb birlashayotgan unitilmas lahzaga guvoh bo'ling. To'y oqshomiga sizlarni lutfan taklif etamiz",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Kamol & Sabina" },
-      { property: "og:description", content: "Ikki qalb birlashayotgan unitilmas lahzaga guvoh bo'ling. To'y oqshomiga sizlarni lutfan taklif etamiz" },
+      {
+        property: "og:description",
+        content:
+          "Ikki qalb birlashayotgan unitilmas lahzaga guvoh bo'ling. To'y oqshomiga sizlarni lutfan taklif etamiz",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Kamol & Sabina" },
-      { name: "twitter:description", content: "Ikki qalb birlashayotgan unitilmas lahzaga guvoh bo'ling. To'y oqshomiga sizlarni lutfan taklif etamiz" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c29b4278-22aa-4f5e-821f-3f77eec6ebc5/id-preview-6221937e--8ee7e74f-5bd6-41fb-b6f7-cb1f4227fac9.lovable.app-1783482725163.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c29b4278-22aa-4f5e-821f-3f77eec6ebc5/id-preview-6221937e--8ee7e74f-5bd6-41fb-b6f7-cb1f4227fac9.lovable.app-1783482725163.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Ikki qalb birlashayotgan unitilmas lahzaga guvoh bo'ling. To'y oqshomiga sizlarni lutfan taklif etamiz",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c29b4278-22aa-4f5e-821f-3f77eec6ebc5/id-preview-6221937e--8ee7e74f-5bd6-41fb-b6f7-cb1f4227fac9.lovable.app-1783482725163.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c29b4278-22aa-4f5e-821f-3f77eec6ebc5/id-preview-6221937e--8ee7e74f-5bd6-41fb-b6f7-cb1f4227fac9.lovable.app-1783482725163.png",
+      },
     ],
     links: [
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
