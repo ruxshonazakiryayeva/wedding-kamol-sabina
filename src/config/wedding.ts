@@ -40,7 +40,7 @@ export const wedding = {
   },
 
   music: {
-    src: "/wedding/song.mp3",
+    src: "/wedding/Ziyoda - Kelibdi (1).mp3",
   },
 
   share: {
